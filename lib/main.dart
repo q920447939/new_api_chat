@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:new_api_chat/chat/chat_detail_page.dart';
 //import 'package:flutter_application_base/core/app/app_init_info.dart';
 //import 'package:flutter_application_base/flutter_application_base.dart';
 import 'package:new_api_chat/chat/chat_index_page.dart';
@@ -35,7 +36,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const ChatIndexPage(),
+      home: const ChatDetailPage(),
     );
   }
 }
