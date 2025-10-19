@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:new_api_chat/entity/chat_info.dart';
 import 'package:tdesign_flutter/tdesign_flutter.dart';
 
@@ -82,7 +83,7 @@ class _ChatIndexPageState extends State<ChatIndexPage> {
   Widget _buildCard(ChatInfo chatInfo) {
     return GestureDetector(
       onTap: () {
-        
+        context.push('/chat_detail');
       },
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 5, vertical: 2),

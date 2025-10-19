@@ -38,8 +38,8 @@ dependencies:
   flutter_chat_ui: ^2.0.0
   gpt_markdown: ^1.1.4
   tdesign_flutter: ^0.2.5
-  #flutter_application_base:
-  #  path: F:\leegoo\flutter_work_space\flutter_application_base
+  flutter_application_base:
+    path: ../flutter_application_base
 
 dev_dependencies:
   flutter_test:
@@ -65,6 +65,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+    - .env
     - assets/img/
 
   # An image asset can refer to one or more resolution-specific "variants", see
