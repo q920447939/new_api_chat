@@ -8,10 +8,17 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:new_api_chat/chat/chat_detail_page.dart';
 import 'package:new_api_chat/chat/chat_index_page.dart';
 import 'package:new_api_chat/route/collapse_data_item.dart';
+import 'package:new_api_chat/chat_test/chat_api_test_page.dart';
 
 Future<void> main() async {
+        await FrameworkModuleManager.initialize(
+        AppInitInfo(
+          child: const MyApp(),
+          appRouterConfig: AppRouterConfig(defaultRoutes: _buildRoute()),
+        ),
+      );
   // 使用 runZonedGuarded 包装整个应用
-  runZonedGuarded<Future<void>>(
+  /* runZonedGuarded<Future<void>>(
     () async {
       // 确保 Flutter 绑定初始化
       WidgetsFlutterBinding.ensureInitialized();
@@ -47,7 +54,7 @@ Future<void> main() async {
       print('runZonedGuarded捕获异常：$error\n$stack');
       _handleGlobalError(error, stack);
     },
-  );
+  ); */
 }
 
 List<CollapseDataItem> router_list = [
@@ -56,6 +63,11 @@ List<CollapseDataItem> router_list = [
     items: [
       Item(title: '首页', page: '/', targetPage: ChatIndexPage()),
       Item(title: '聊天', page: '/chat_detail', targetPage: ChatDetailPage()),
+      Item(
+        title: '聊天API测试',
+        page: '/chat_test',
+        targetPage: ChatApiTestPage(),
+      ),
     ],
   ),
 ];
@@ -89,7 +101,7 @@ void _handleGlobalError(Object error, StackTrace stack) {
   // 例如发送到错误监控服务
 
   // 3. 显示用户友好的错误提示（需要确保应用已初始化）
-  try {
+  /* try {
     SmartDialog.show(
       builder:
           (_) => Container(
@@ -129,7 +141,7 @@ void _handleGlobalError(Object error, StackTrace stack) {
   } catch (e) {
     // 如果 SmartDialog 不可用，使用系统级错误处理
     debugPrint('无法显示错误对话框：$e');
-  }
+  } */
 }
 
 class MyApp extends StatelessWidget {

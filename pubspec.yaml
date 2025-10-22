@@ -40,6 +40,7 @@ dependencies:
   tdesign_flutter: ^0.2.5
   flutter_application_base:
     path: ../flutter_application_base
+  dio: ^5.4.0
 
 dev_dependencies:
   flutter_test:

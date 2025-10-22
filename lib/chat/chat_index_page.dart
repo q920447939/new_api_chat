@@ -39,6 +39,7 @@ class _ChatIndexPageState extends State<ChatIndexPage> {
       child: Column(
         children: [
           _rightMultiAction(context),
+          _buildTestEntry(context),
           _buildNewChat(),
         ],
       ),
@@ -71,11 +72,23 @@ class _ChatIndexPageState extends State<ChatIndexPage> {
     );
   }
 
-    List<Widget> _buildNewChatItem() {
-     var list =  generatorChatInfoMockData();
-    return list.map((e){
-      return _buildCard(e);
-    }).toList();
+  Widget _buildTestEntry(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton.icon(
+          onPressed: () => context.push('/chat_test'),
+          icon: const Icon(Icons.play_circle_fill),
+          label: const Text('聊天 API 模拟测试'),
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildNewChatItem() {
+    final list = generatorChatInfoMockData();
+    return list.map((e) => _buildCard(e)).toList();
   }
 
 
