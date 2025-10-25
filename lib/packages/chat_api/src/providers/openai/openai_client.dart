@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
 
 import '../../chat_api_client.dart';
 import '../../errors/chat_api_exception.dart';
 import '../../http/chat_http_client.dart';
+import '../../http/chat_http_client.dart' as http_utils;
 import '../../models/chat_completion.dart';
 import '../../models/chat_message.dart';
 import '../../models/chat_stream_event.dart';
@@ -47,59 +47,51 @@ class OpenAIChatClient implements ChatApiClient {
   }) async* {
     final openAiRequest = _ensureOpenAIRequest(request).copyWith(stream: true);
     final aggregator = _OpenAIStreamAggregator();
-    final buffer = StringBuffer();
 
     try {
-      final stream = _httpClient.postSseStream(
-        _completionsPath,
-        data: openAiRequest.toJson(),
-        options: options,
-      );
-
-      await for (final rawChunk in stream) {
-        buffer.write(rawChunk);
-        final segments = buffer.toString().split('\n\n');
-
-        for (var i = 0; i < segments.length - 1; i++) {
-          final payload = _extractSsePayload(segments[i]);
-          if (payload == null) {
-            continue;
-          }
-
-          if (payload == '[DONE]') {
-            final result = aggregator.buildResult();
-            yield ChatStreamEvent.done(result);
-            return;
-          }
-
-          final chunk = parseOpenAIStreamEvent(payload);
-          if (chunk == null) {
-            continue;
-          }
-
-          for (final event in aggregator.handleChunk(chunk)) {
-            yield event;
-          }
-        }
-
-        buffer
-          ..clear()
-          ..write(segments.last);
+      // Build the full URL
+      final baseUrl = _httpClient.config.baseUrl ?? '';
+      final uri = Uri.parse('$baseUrl$_completionsPath');
+      
+      // Get API key from config
+      final apiKey = _httpClient.config.apiKey;
+      if (apiKey == null) {
+        throw ChatApiException('API key is required for OpenAI requests');
       }
 
-      final trailingPayload = _extractSsePayload(buffer.toString());
-      if (trailingPayload != null) {
-        if (trailingPayload == '[DONE]') {
+      // Create headers from options
+      final extraHeaders = <String, String>{};
+      if (options?.headers != null) {
+        extraHeaders.addAll(options!.headers.cast<String, String>());
+      }
+
+      final stream = http_utils.createChatCompletionStream(
+        uri: uri,
+        apiKey: apiKey,
+        payload: openAiRequest.toJson(),
+        extraHeaders: extraHeaders,
+        timeout: options?.timeout,
+      );
+
+      await for (final payload in stream) {
+        final trimmedPayload = payload.trim();
+        if (trimmedPayload.isEmpty) {
+          continue;
+        }
+
+        if (trimmedPayload == '[DONE]') {
           final result = aggregator.buildResult();
           yield ChatStreamEvent.done(result);
           return;
         }
 
-        final chunk = parseOpenAIStreamEvent(trailingPayload);
-        if (chunk != null) {
-          for (final event in aggregator.handleChunk(chunk)) {
-            yield event;
-          }
+        final chunk = parseOpenAIStreamEvent(payload);
+        if (chunk == null) {
+          continue;
+        }
+
+        for (final event in aggregator.handleChunk(chunk)) {
+          yield event;
         }
       }
 
@@ -131,23 +123,6 @@ class OpenAIChatClient implements ChatApiClient {
     }
     throw ChatApiException('OpenAI response body was empty.');
   }
-}
-
-String? _extractSsePayload(String segment) {
-  if (segment.isEmpty) {
-    return null;
-  }
-  final lines = const LineSplitter().convert(segment);
-  final dataLines = <String>[];
-  for (final line in lines) {
-    if (line.startsWith('data:')) {
-      dataLines.add(line.substring(5).trimRight());
-    }
-  }
-  if (dataLines.isEmpty) {
-    return null;
-  }
-  return dataLines.join('\n');
 }
 
 class _OpenAIStreamAggregator {
